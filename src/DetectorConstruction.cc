@@ -60,7 +60,7 @@ DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
   fDetectorMessenger->DeclareProperty("CollimatorDistance", fCollimatorDistance, "Select moderator thickness");
   
   fModeratorDepth = 0.01*mm;
-  fCollimatorDepth = 1.2*mm;
+  fCollimatorDepth = 2.0*mm;
   fCollimatorHoleRadius = .1*mm;
   fCollimatorDistance = 0.0*mm;
   
@@ -223,7 +223,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   SourceVisAttributes->SetForceSolid(true);
   
   G4double fSourceWidth= depth/2;
-
+  SetSourceWidth(depth/2);
+  
   G4Tubs *SolidSource = new G4Tubs("Source",0,innerRad,fSourceWidth/2,0,360);  
   
   G4LogicalVolume*                         

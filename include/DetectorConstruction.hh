@@ -49,13 +49,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
   
-    DetectorConstruction();
-   ~DetectorConstruction();
+  DetectorConstruction();
+  ~DetectorConstruction();
 
-    virtual     
-    G4VPhysicalVolume* Construct();
-                        
+  virtual     
+  G4VPhysicalVolume* Construct();
 
+  void SetSourceWidth(G4double a) {fSourceWidth=a;}
   G4double GetSourceWidth() {return fSourceWidth;}
   G4PhysicalVolumeStore* GetVolumeStored() {return fPhysVolStore;}
   SensitiveDetector* GetSensitiveDetector(){return fSensitiveDetector;}

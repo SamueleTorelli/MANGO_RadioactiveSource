@@ -43,10 +43,10 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* Detector)
-  : G4VUserPrimaryGeneratorAction(),
-    fParticleGun(0),
-    fDetector(Detector)
+PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* Detector):
+  G4VUserPrimaryGeneratorAction(),
+  fParticleGun(0),
+  fDetector(Detector)
 {
   
   G4int n_particle = 1;
@@ -101,8 +101,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
 
 G4ThreeVector PrimaryGeneratorAction::GetPointOnSource(){
 
-  G4double width = fDetector->GetSourceWidth();
-
+  G4double width = (fDetector->GetSourceWidth());
     
   G4VPhysicalVolume* vol = fDetector->GetVolumeStored()->GetVolume("Source"); // get the corresponding random physical volume
 
@@ -113,10 +112,11 @@ G4ThreeVector PrimaryGeneratorAction::GetPointOnSource(){
   G4ThreeVector Normal = solid->SurfaceNormal(PointOnSurface); // get the normal to the surface in that point
   
   G4ThreeVector TranslationVolume = vol->GetObjectTranslation(); // get the translation vector of that physical volume
-  
-  G4ThreeVector Point = TranslationVolume + PointOnSurface - G4UniformRand()*width*Normal; //random point in the random volume as the translation vector + a point on the surface + a random depth 
 
+  G4ThreeVector NormDepth = (G4UniformRand()*width)*Normal;
   
+  G4ThreeVector Point = TranslationVolume + PointOnSurface - NormDepth; //random point in the random volume as the translation vector + a point on the surface + a random depth 
+
   /*
   G4cout<< "ElementNumber_____ " << nEl << "\n";
   G4cout<< "Element " << Elements[nEl] << "\n";

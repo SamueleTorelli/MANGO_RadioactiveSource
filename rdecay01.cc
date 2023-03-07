@@ -75,6 +75,8 @@ int main(int argc,char** argv) {
   //
 
   DetectorConstruction* theDetector = new DetectorConstruction();
+
+  G4cout << theDetector << G4endl;
   
   runManager->SetUserInitialization(theDetector);
 

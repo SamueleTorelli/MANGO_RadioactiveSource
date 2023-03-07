@@ -58,7 +58,7 @@ public:
   virtual void GeneratePrimaries(G4Event*);
   G4ParticleGun* GetParticleGun() { return fParticleGun;};
   G4ThreeVector GetPointOnSource();
-  
+    
 private:
   G4ParticleGun*  fParticleGun;
   DetectorConstruction* fDetector;
