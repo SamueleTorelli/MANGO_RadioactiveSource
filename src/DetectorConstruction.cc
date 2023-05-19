@@ -49,9 +49,9 @@
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
 {
-  fWorldSize_x = 0.5*m;
-  fWorldSize_y = 0.5*m;
-  fWorldSize_z = 0.5*m;  
+  fWorldSize_x = 0.3*m;
+  fWorldSize_y = 0.3*m;
+  fWorldSize_z = 0.3*m;  
 
   fDetectorMessenger = new G4GenericMessenger(this, "/detector/","Element of the detector");
   fDetectorMessenger->DeclareProperty("ModeratorThickness", fModeratorDepth, "Select moderator thickness");
@@ -61,7 +61,7 @@ DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
   
   fModeratorDepth = 0.01*mm;
   fCollimatorDepth = 2.0*mm;
-  fCollimatorHoleRadius = .1*mm;
+  fCollimatorHoleRadius = 1. / 2 *mm;
   fCollimatorDistance = 0.0*mm;
   
 }
@@ -90,8 +90,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material* Strontium =
     nist->FindOrBuildMaterial("G4_Sr");
 
-  G4Material* Lead =
-    nist->FindOrBuildMaterial("G4_Pb");
+  G4Material* Tungsten =
+    nist->FindOrBuildMaterial("G4_W");
 
   
   //
@@ -185,13 +185,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //defining the source base
   //
   
-  G4double outerRad = 12*mm;
-  G4double InnerSourceContThick = 8*mm;
+  G4double outerRad = 25./2*mm;
+  G4double InnerSourceContThick = 5*mm;
     
   G4Tubs *OuterTube = new G4Tubs("outerSupport",0,outerRad,InnerSourceContThick/2,0,360);
 
-  G4double innerRad = 2.5*mm;
-  G4double depth = 1*mm;
+  G4double innerRad = 5*mm;
+  G4double depth = 0.01*mm;
   
   G4Tubs *InnerTube = new G4Tubs("outerSupport",0,innerRad,depth/2,0,360);
 
@@ -222,7 +222,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VisAttributes* SourceVisAttributes = new G4VisAttributes(SourceColor);
   SourceVisAttributes->SetForceSolid(true);
   
-  G4double fSourceWidth= depth/2;
+  //G4double fSourceWidth= depth/2;
   SetSourceWidth(depth/2);
   
   G4Tubs *SolidSource = new G4Tubs("Source",0,innerRad,fSourceWidth/2,0,360);  
@@ -286,16 +286,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4VisAttributes* collimatorVisAttributes = new G4VisAttributes(CollimatorColor);
   collimatorVisAttributes->SetForceSolid(true);
 
-  
+  G4double CollimatorRadius = 16./2*mm; 
       
-  G4Tubs *OuterCollimator = new G4Tubs("OutCollimator",0,outerRad+1*cm,fCollimatorDepth/2,0,360);
+  G4Tubs *OuterCollimator = new G4Tubs("OutCollimator",0,CollimatorRadius,fCollimatorDepth/2,0,360);
   G4Tubs *InnerCollimator = new G4Tubs("InnCollimator",0,fCollimatorHoleRadius,fCollimatorDepth,0,360);
 
   G4VSolid* SolidCollimator = new G4SubtractionSolid("Collimator", OuterCollimator,InnerCollimator, 0, G4ThreeVector(0.,0.,0.));  
   
   G4LogicalVolume*
     logicCollimator = new G4LogicalVolume(SolidCollimator,             //its solid
-					  Lead,                    //its material
+					  Tungsten,                    //its material
 					 "Collimator");               //its name
 
   logicCollimator->SetVisAttributes(collimatorVisAttributes);

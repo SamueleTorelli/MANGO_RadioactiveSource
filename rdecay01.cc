@@ -80,9 +80,16 @@ int main(int argc,char** argv) {
   
   runManager->SetUserInitialization(theDetector);
 
-  G4PhysListFactory factory;
+  /*G4PhysListFactory factory;
   G4VModularPhysicsList* physicsList = factory.GetReferencePhysList("FTFP_BERT_HP");
   physicsList->SetVerboseLevel(0);
+  */
+
+  G4PhysListFactory factory;   
+  
+  G4VModularPhysicsList* physicsList = factory.GetReferencePhysList("QGSP_BIC_EMZ");
+  physicsList->SetVerboseLevel(0);
+  physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics);
     
   runManager->SetUserInitialization(physicsList);
 
