@@ -93,6 +93,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material* Tungsten =
     nist->FindOrBuildMaterial("G4_W");
 
+  std::vector<G4int> natoms;
+  std::vector<G4String> elements;
+
+  elements.push_back("O");
+  natoms.push_back(2);
+
+  G4double PMMADensity = 1.190*g/cm3;
+
+  G4Material* PMMA = nist->ConstructNewMaterial("PMMA", elements, natoms, PMMADensity);
+
   
   //
   //defining detector gas mixture
@@ -313,18 +323,47 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   
+  
+  //
+  //Creating the RING
+  //
+
+  G4double radialRingThickness=1.0*cm;
+  G4double RingThicknessAlongDrift=0.5*cm;  
+  G4double GasRadius = 36.9*mm;
+  G4double GasThickness = 50*mm;
+
+  G4RotationMatrix* rotX = new G4RotationMatrix();
+  rotX->rotateX(90*degree);
+
+
+  G4Tubs* solidRing = new G4Tubs("solidRing",GasRadius,GasRadius+radialRingThickness,RingThicknessAlongDrift/2,0,360);
+
+  G4LogicalVolume*
+    logicRing = new G4LogicalVolume(solidRing,             //its solid
+					  PMMA,                    //its material
+					  "Ring");               //its name
+  G4int Nrings = 5;
+  G4double ringSpacing = (GasThickness-5*RingThicknessAlongDrift)/4;
+
+  for(int i =-2;i<3;i++){
+
+    G4VPhysicalVolume* phisicalRings = new G4PVPlacement(rotX,
+						       G4ThreeVector(0,-i*ringSpacing-i*RingThicknessAlongDrift+RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
+						       logicRing,
+						       "Ring",
+						       logicWorld,
+						       false,
+						       0);
+    
+  }
+  
+  
   //
   //CF4 sensitive volume
   //
-
-  G4double GasDistanceFromCollim = 5*mm;
-  
-  G4double GasRadius = 40*mm;
-  G4double GasThickness = 50*mm;
-  
-  G4RotationMatrix* rotX = new G4RotationMatrix();
-  rotX->rotateX(90*degree);
-  
+    
+    
   G4Colour GasColor(0.0,0.0,1.0,0.5);
   G4VisAttributes* GasVisAttributes = new G4VisAttributes(GasColor);
   GasVisAttributes->SetForceSolid(true);
@@ -338,9 +377,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   fLogicalGasVolume->SetVisAttributes(GasVisAttributes);
   
-        
+  
   G4VPhysicalVolume* GasVolume = new G4PVPlacement(rotX,
-						       G4ThreeVector(0,0,InnerSourceContThick/2+fCollimatorDepth/2+fCollimatorDistance+GasRadius+GasDistanceFromCollim),
+						       G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
 						       fLogicalGasVolume,
 						       "GasVolume",
 						       logicWorld,
@@ -348,6 +387,8 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 						       0);
   
     
+
+  
   //
   //Creating the physicalvolumestore
   //
