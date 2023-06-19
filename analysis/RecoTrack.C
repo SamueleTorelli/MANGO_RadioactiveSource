@@ -1,17 +1,18 @@
 bool is_fully_contained(double x, double y, double z) {
 
-  double InnerSourceContThick = 8;
-  double GasRadius = 40;
-  double GasDistanceFromCollim = 0;
-  double CollimatorDepth = 0.6;
-  double CollimatorDistance = 0;
-  double GasThickness = 50;
+  //punti x y e z 
+  double_t xCenter = 0;
+  double_t yCenter = 5.0;
+  double_t zCenter = 51.4;
   
-  double cyl_center_z = InnerSourceContThick/2+CollimatorDepth/2+CollimatorDistance+GasRadius+GasDistanceFromCollim; 
+  //everything in mm
+  double GasRadius = 36.9;
+  double GasThickness = 50;
+  //xz sono sulla circonferenza y è la drift direction
 
-  double distance_from_center = std::sqrt(std::pow(x, 2) + std::pow(cyl_center_z-z, 2));
-  double vertical_distance = abs(y);
-
+  double_t vertical_distance = abs(y-yCenter);
+  double_y distance_from_center = sqrt( pow  )
+  
   if(vertical_distance<(GasThickness/2-1) && distance_from_center<(GasRadius-1)){
     return true;
   } else {

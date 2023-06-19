@@ -287,7 +287,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   */
 
 
-  
   //
   //defining collimator
   //
@@ -319,7 +318,41 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 				      false,                  //no boolean operation
 				       0);                     //copy number
 
+
+
   
+  //
+  //defining collimator
+  //
+
+  G4double CollimatorHoleRadius2=1.56/2*mm;  
+  
+  G4Colour Collimator2Color(0.45,0.25,0.0,0.5);
+  G4VisAttributes* collimator2VisAttributes = new G4VisAttributes(CollimatorColor);
+  collimator2VisAttributes->SetForceSolid(true);
+
+  G4double Collimator2Radius = 16./2*mm; 
+      
+  G4Tubs *OuterCollimator2 = new G4Tubs("OutCollimator2",0,CollimatorRadius,fCollimatorDepth/2,0,360);
+  G4Tubs *InnerCollimator2 = new G4Tubs("InnCollimator2",0,CollimatorHoleRadius2,fCollimatorDepth,0,360);
+
+  G4VSolid* SolidCollimator2 = new G4SubtractionSolid("Collimator2", OuterCollimator2,InnerCollimator2, 0, G4ThreeVector(0.,0.,0.));  
+  
+  G4LogicalVolume*
+    logicCollimator2 = new G4LogicalVolume(SolidCollimator2,             //its solid
+					  Tungsten,                    //its material
+					 "Collimator2");               //its name
+
+  logicCollimator2->SetVisAttributes(collimatorVisAttributes);
+  
+  G4VPhysicalVolume*                                   
+    physCollimator2 = new G4PVPlacement(0,                      //no rotation
+					G4ThreeVector(0,0,InnerSourceContThick/2+fCollimatorDepth/2+fCollimatorDistance+fCollimatorDepth+fCollimatorDistance),        //at (0,0,0)
+				      logicCollimator2,             //its logical volume
+				      "Collimator2",                //its name
+				      logicWorld,                      //its mother  volume
+				      false,                  //no boolean operation
+				       0);                     //copy number
   
   
   
@@ -349,7 +382,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   for(int i =-2;i<3;i++){
 
     G4VPhysicalVolume* phisicalRings = new G4PVPlacement(rotX,
-						       G4ThreeVector(0,-i*ringSpacing-i*RingThicknessAlongDrift+RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
+						       G4ThreeVector(0,-i*ringSpacing-i*RingThicknessAlongDrift+RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
 						       logicRing,
 						       "Ring",
 						       logicWorld,
@@ -357,6 +390,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 						       0);
     
   }
+
   
   
   //
@@ -379,7 +413,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   G4VPhysicalVolume* GasVolume = new G4PVPlacement(rotX,
-						       G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
+						       G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
 						       fLogicalGasVolume,
 						       "GasVolume",
 						       logicWorld,
@@ -388,6 +422,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
     
 
+  std:: cout << G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness) << std::endl;
   
   //
   //Creating the physicalvolumestore

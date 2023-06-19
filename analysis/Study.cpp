@@ -21,12 +21,11 @@ int main(int argc, char** argv){
   auto mytree = std::unique_ptr<TTree>( (TTree*)f.get()->Get("elabHits") );
     
   TTreeReader reader(mytree.get());
-  TTreeReaderValue<Int_t> EventNumber(reader, "EventNumber");
-  TTreeReaderValue<Int_t> nhits(reader, "nhits");
-  TTreeReaderValue<Double_t> EDepTot(reader, "TotalEDep");
-  TTreeReaderValue<std::vector<double>> x_hits(reader, "x_hits");
-  TTreeReaderValue<std::vector<double>> y_hits(reader, "y_hits");
-  TTreeReaderValue<std::vector<double>> z_hits(reader, "z_hits");
+  TTreeReaderValue<Int_t> nhits(reader, "nhits_out");
+  TTreeReaderValue<Double_t> EDepTot(reader, "EDep_Out");
+  TTreeReaderValue<std::vector<double>> x_hits(reader, "x_hits_out");
+  TTreeReaderValue<std::vector<double>> y_hits(reader, "y_hits_out");
+  TTreeReaderValue<std::vector<double>> z_hits(reader, "z_hits_out");
   TTreeReaderValue<std::vector<double>> edep_hits(reader, "Edep_hits");
 
   std::unique_ptr<TGraph> graph(new TGraph());
@@ -37,17 +36,24 @@ int main(int argc, char** argv){
   //1.2cm is the fitted distance 
 
   std::unique_ptr<TH1D> histoTh( new TH1D("histoIntrRes","histoIntrRes",150,-TMath::Pi(),TMath::Pi()) );
-
+  
   std::vector<TGraph*> TGvec;
   
   double dist=0;
-  
+  double dir;
+
   auto fout = std::unique_ptr<TFile>( new TFile("outHisto.root","recreate") );  
   fout.get()->cd();
 
+  std::unique_ptr<TTree> myTree( new TTree("myTree", "My Tree") );
+
+  Double_t EDepOut;
+  
+  myTree->Branch("EDepOut", &EDepOut, "EDepOut/D");
+  myTree->Branch("Dir", &dir, "Dir/D");
+    
 
   for (auto entry : reader){  
-
     
     
     for(auto x = (*x_hits).begin(), y = (*z_hits).begin() ; x!= (*x_hits).end()-1 || y!=(*z_hits).end()-1; ++x, ++y   ){
@@ -82,18 +88,27 @@ int main(int argc, char** argv){
       graph.get()->SetMarkerStyle(8);
       graph.get()->Write();
     }
+
+    dir=atan(fit.get()->GetParameter(1));
+    EDepOut=*EDepTot;
     
     histoTh->Fill(atan(fit.get()->GetParameter(1)));
-    std:: cout << fit.get()->GetParameter(1) << "  " << atan(fit.get()->GetParameter(1)) << "\n";
+    std:: cout <<  *EDepTot  <<" " <<fit.get()->GetParameter(1) << "  " << atan(fit.get()->GetParameter(1)) << "\n";
     X.clear();
     Y.clear();
+
+    myTree->Fill();
+    
   }//chiudo for entries
 
 
   histoTh.get()->Write();
+  myTree.get()->Write();
+  
   fout.get()->Save();
   fout.get()->Close();
-  
+
+  std::cout << "end" << std::endl;
   
   return EXIT_SUCCESS;
 }
