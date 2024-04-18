@@ -336,6 +336,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4RotationMatrix* rotX = new G4RotationMatrix();
   rotX->rotateX(90*degree);
 
+  G4Colour darkGreyColor(0.3, 0.3, 0.3, 1.0);  // Opaque dark grey
+  G4VisAttributes* RingVisAttributes = new G4VisAttributes(darkGreyColor);
+  RingVisAttributes->SetForceSolid(true);
 
   G4Tubs* solidRing = new G4Tubs("solidRing",GasRadius,GasRadius+radialRingThickness,RingThicknessAlongDrift/2,0,360);
 
@@ -357,7 +360,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 						       0);
     
   }
-  
+  logicRing->SetVisAttributes(RingVisAttributes);
   
   //
   //CF4 sensitive volume
