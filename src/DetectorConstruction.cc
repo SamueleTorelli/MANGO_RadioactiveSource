@@ -59,9 +59,9 @@ DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
   fDetectorMessenger->DeclareProperty("CollimatorHoleRadius", fCollimatorHoleRadius, "Select moderator thickness");
   fDetectorMessenger->DeclareProperty("CollimatorDistance", fCollimatorDistance, "Select moderator thickness");
   
-  fModeratorDepth = 0.01*mm;
+  fModeratorDepth = 0.01*mm;//Moderator is commented
   fCollimatorDepth = 2.0*mm;
-  fCollimatorHoleRadius = 1. / 2 *mm;
+  fCollimatorHoleRadius = 2. / 2 *mm;
   fCollimatorDistance = 0.0*mm;
   
 }
@@ -257,7 +257,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   //
   //defining moderator
   //
-
+/* 
   //  G4Colour ModeratorColor(0.5, 0.5, 0.5, 0.04);
   //  G4VisAttributes* moderatorVisAttributes = new G4VisAttributes(ModeratorColor);
   //  moderatorVisAttributes->SetForceSolid(true);
@@ -269,7 +269,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     logicModerator = new G4LogicalVolume(SolidModerator,             //its solid
 					 Alluminium,                    //its material
 					 "Moderator");               //its name
-
+ */
   //logicModerator->SetVisAttributes(moderatorVisAttributes);
 
   /*
@@ -336,6 +336,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4RotationMatrix* rotX = new G4RotationMatrix();
   rotX->rotateX(90*degree);
 
+  G4Colour darkGreyColor(0.3, 0.3, 0.3, 1.0);  // Opaque dark grey
+  G4VisAttributes* RingVisAttributes = new G4VisAttributes(darkGreyColor);
+  RingVisAttributes->SetForceSolid(true);
 
   G4Tubs* solidRing = new G4Tubs("solidRing",GasRadius,GasRadius+radialRingThickness,RingThicknessAlongDrift/2,0,360);
 
@@ -357,7 +360,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 						       0);
     
   }
-  
+  logicRing->SetVisAttributes(RingVisAttributes);
   
   //
   //CF4 sensitive volume

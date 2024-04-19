@@ -47,6 +47,8 @@
 #include "G4VisExecutive.hh"
 #include "G4PhysListFactory.hh"
 
+#include "G4HadronicParameters.hh"
+
 int main(int argc,char** argv) {
 
   //detect interactive mode (if no arguments) and define UI session
@@ -78,6 +80,8 @@ int main(int argc,char** argv) {
 
   G4cout << theDetector << G4endl;
   
+  //suggested in https://geant4.web.cern.ch/download/release-notes/notes-v11.2.0.html for geant4 11.2.1
+  G4HadronicParameters::Instance()->SetTimeThresholdForRadioactiveDecay( 1.0e+60*CLHEP::year );
   runManager->SetUserInitialization(theDetector);
 
   /*G4PhysListFactory factory;
@@ -85,12 +89,14 @@ int main(int argc,char** argv) {
   physicsList->SetVerboseLevel(0);
   */
 
+
+  //Physics list
   G4PhysListFactory factory;   
-  
   G4VModularPhysicsList* physicsList = factory.GetReferencePhysList("QGSP_BIC_EMZ");
   physicsList->SetVerboseLevel(0);
   physicsList->RegisterPhysics(new G4RadioactiveDecayPhysics);
-    
+
+
   runManager->SetUserInitialization(physicsList);
 
   runManager->SetUserInitialization(new ActionInitialization(theDetector));
