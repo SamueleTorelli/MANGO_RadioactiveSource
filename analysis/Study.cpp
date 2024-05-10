@@ -36,7 +36,7 @@ int main(int argc, char** argv){
   std::unique_ptr<TGraph> graph(new TGraph());
   std::unique_ptr<TF1> fit( new TF1("fit","pol1") );
 
-  std::vector<Double_t> X,Y;
+  std::vector<Double_t> X,Z;
 
   //1.2cm is the fitted distance
   // Histogram to store angle calculations
@@ -65,18 +65,18 @@ int main(int argc, char** argv){
     EDep = *TotalEDep;  // Assign the TotalEDep from the input TTree to EDep
     FContained=*FullyContained;
     // Loop through hits and calculate distances
-    for(auto x = (*x_hits).begin(), y = (*z_hits).begin(); x!= (*x_hits).end()-1 || y!=(*z_hits).end()-1; ++x, ++y   ){
+    for(auto x = (*x_hits).begin(), z = (*z_hits).begin(); x!= (*x_hits).end()-1 || z!=(*z_hits).end()-1; ++x, ++z   ){
       if(dist<5){
-        X.push_back((*y));
-        Y.push_back((*x));
-        //std::cout << (*x) << " "<< (*y) << std::endl;
+        X.push_back((*x));
+        Z.push_back((*z));
+        //std::cout << (*x) << " "<< (*z) << std::endl;
       }
       else {
         break;
       }//chiudo else
 
       // Calculate the Euclidean distance between consecutive points
-      dist+=sqrt( ((*x)-(*x+1)) * ((*x)-(*x+1)) + ((*y)-(*y+1)) * ((*y)-(*y+1)) );
+      dist+=sqrt( ((*x)-(*x+1)) * ((*x)-(*x+1)) + ((*z)-(*z+1)) * ((*z)-(*z+1)) );
       //std::cout << dist << std::endl;
 
     }//chiudo for on coordinates
@@ -88,7 +88,7 @@ int main(int argc, char** argv){
     }
 
     for(int i=0;i<X.size();i++){
-      graph.get()->SetPoint(i,X[i],Y[i]);
+      graph.get()->SetPoint(i,X[i],Z[i]);
     }
     // Fit the graph with a linear function
     graph.get()->Fit(fit.get(),"Q");
@@ -97,10 +97,15 @@ int main(int argc, char** argv){
     if(entry%300 == 0) {
       graph.get()->SetName(Form("Plot%lli",entry));
       graph.get()->SetMarkerStyle(8);
+      graph.get()->SetTitle("Example Plot%lli;X axis;Z axis");
       graph.get()->Write();
     }
 
     double radangl=atan(fit.get()->GetParameter(1));
+
+    if (radangl>=0) radangl = radangl - TMath::Pi()/2;
+    else radangl = radangl + TMath::Pi()/2;
+
     double degangl= radangl * 180.0 / TMath::Pi();
     angDeg=degangl;
     angRad=radangl;
@@ -113,9 +118,9 @@ int main(int argc, char** argv){
       outTree->Fill();
     }
     //std:: cout << fit.get()->GetParameter(1) << "  " << atan(fit.get()->GetParameter(1)) << "\n";
-    // Clear X and Y vectors for the next iteration
+    // Clear X and Z vectors for the next iteration
     X.clear();
-    Y.clear();
+    Z.clear();
   }//chiudo for entries
   fout.get()->cd();
   // Write histogram to file and close the file

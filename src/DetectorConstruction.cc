@@ -124,9 +124,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4double aF=18.998*g/mole;
   G4Element* elF = new G4Element("Flourine"  ,"F" , 9., aF);
 
-  G4double He_frac = 0.0;
-  G4double CF4_frac = 0.2;
-  G4double Ar_frac = 0.8;
+  G4double He_frac = 0.6;
+  G4double CF4_frac = 0.4;
+  G4double Ar_frac = 0.;
 
   //Ar gas
   G4double densityAr = 1394*Ar_frac*g/m3;
