@@ -32,7 +32,12 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(rdecay01 rdecay01.cc ${sources} ${headers})
-target_link_libraries(rdecay01 ${Geant4_LIBRARIES} )
+target_link_libraries(rdecay01 ${Geant4_LIBRARIES})
+
+#----------------------------------------------------------------------------
+# Create the output_files directory in the build directory
+#
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/output_files)
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -57,4 +62,3 @@ endforeach()
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS rdecay01 DESTINATION bin)
-
