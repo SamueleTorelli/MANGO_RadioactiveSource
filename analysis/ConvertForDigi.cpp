@@ -72,9 +72,12 @@ int main(int argc, char** argv) {
     Double_t ETotal_NR;
     vector<Int_t> pdgID;
     vector<Double_t> tracklen;
-    Double_t px_part;
-    Double_t py_part;
-    Double_t pz_part;
+    //Double_t px_part;
+    //Double_t py_part;
+    //Double_t pz_part;
+    vector<Double_t> px_part;
+    vector<Double_t> py_part;
+    vector<Double_t> pz_part;
     vector<Double_t> EdepHits_out;
     vector<Double_t> x_hits_out;
     vector<Double_t> y_hits_out;
@@ -118,13 +121,16 @@ int main(int argc, char** argv) {
         // Check if the current hit belongs to the same event and nucleus as previously processed.
         if(Out_event == Evn && nucl == Nucleus){
         // Accumulate total energy deposited.
-        ETotal += EnergyDeposit;
+        ETotal += EnergyDeposit*1000;//digi wants it in keV
         nhits_out++;
         // Store hit data.
+        px_part.push_back(px_particle);
+        py_part.push_back(py_particle);
+        pz_part.push_back(pz_particle);
         x_hits_out.push_back(x_hits);
         y_hits_out.push_back(y_hits);
         z_hits_out.push_back(z_hits);
-        EdepHits_out.push_back(EnergyDeposit);
+        EdepHits_out.push_back(EnergyDeposit*1000);
         pdgID.push_back(pdgID_hits);
         tracklen.push_back(tracklen_hits);
         }
@@ -134,9 +140,9 @@ int main(int argc, char** argv) {
         //nhits_out
         //ETotal
         ETotal_NR=0;
-        px_part=px_particle;
-        py_part=py_particle;
-        pz_part=pz_particle;
+        //px_part=px_particle;
+        //py_part=py_particle;
+        //pz_part=pz_particle;
         //FILL
         outTree->Fill();
         //RESET
@@ -145,12 +151,16 @@ int main(int argc, char** argv) {
         ETotal=0;
         nhits_out=1;
         x_hits_out.clear(); y_hits_out.clear(); z_hits_out.clear(); EdepHits_out.clear();
+        px_part.clear(); py_part.clear(); pz_part.clear();
         // Start accumulating new event data.
-        ETotal+=EnergyDeposit;
+        ETotal+=EnergyDeposit*1000;//digi wants it in keV
         x_hits_out.push_back(x_hits);
         y_hits_out.push_back(y_hits);
         z_hits_out.push_back(z_hits);
-        EdepHits_out.push_back(EnergyDeposit);
+        px_part.push_back(px_particle);
+        py_part.push_back(py_particle);
+        pz_part.push_back(pz_particle);
+        EdepHits_out.push_back(EnergyDeposit*1000);
         }
 
 

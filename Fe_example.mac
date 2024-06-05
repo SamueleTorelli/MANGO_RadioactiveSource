@@ -1,0 +1,28 @@
+# Set verbosity
+/control/verbose 2
+/run/verbose 2
+/tracking/verbose 1
+
+# Initialize the visualization
+/vis/open OGL 600x600-0+0
+/vis/viewer/set/viewpointThetaPhi 90 180
+/vis/drawVolume
+/vis/scene/add/axes 0 0 0 1 m
+/vis/scene/add/trajectories smooth
+/vis/scene/endOfEventAction accumulate
+/vis/scene/endOfRunAction accumulate
+/vis/geometry/set/visibility World 0 false
+/vis/geometry/set/visibility Detector 0 true
+/vis/viewer/set/autoRefresh true
+/vis/viewer/flush
+/vis/verbose warnings
+
+# Define the particle gun
+/process/eLoss/StepFunction 0.001 0.01 mm
+/gun/particle gamma
+/gun/energy 5.9 keV
+/gun/direction 0 -1 0 # Change this to your desired direction
+/gun/position 0 23 51.4 mm # Change this to your desired starting position
+
+# Start the run
+/run/beamOn 100

@@ -7,6 +7,8 @@
     - `G4HadronicParameters::Instance()->SetTimeThresholdForRadioactiveDecay( 1.0e+60*CLHEP::year );`
   - comment it if you are using <=11.1.0
 - Using `myMac.mac`
+- The new version has the possibility to simulate calibration dataset with fixed energy gammas shot from the cathode
+  - Comment the standard block in `PrimaryGenerator.cc` and uncomment the block for gamma calibration
 
 ## ANALYSIS
 
