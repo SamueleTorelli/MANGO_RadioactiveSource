@@ -41,7 +41,9 @@
 #include "SensitiveDetector.hh"
 #include "globals.hh"
 
-
+class G4UniformElectricField;
+class G4EqMagElectricField;
+class G4MagIntegratorStepper;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 class G4VPhysicalVolume;
 
@@ -51,6 +53,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   
   DetectorConstruction();
   ~DetectorConstruction();
+  // Other member function declarations
+  void SetupElectricField();
 
   virtual     
   G4VPhysicalVolume* Construct();
@@ -79,6 +83,10 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   virtual void ConstructSDandField();
 
   G4GenericMessenger* fDetectorMessenger;
+  // Member variables related to electric field setup
+  G4UniformElectricField* fElectricField;
+  G4EqMagElectricField* fEquation;
+  G4MagIntegratorStepper* fStepper;
   
 };
 

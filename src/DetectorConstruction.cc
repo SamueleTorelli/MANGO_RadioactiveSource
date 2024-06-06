@@ -44,7 +44,7 @@
 #include "G4PhysicalVolumeStore.hh"
 #include "G4Tubs.hh"
 #include "SensitiveDetector.hh"
-
+#include "G4Torus.hh"
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
@@ -93,6 +93,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   G4Material* Tungsten =
     nist->FindOrBuildMaterial("G4_W");
 
+  // Define Silver using NIST material database
+  G4Material* Silver = nist->FindOrBuildMaterial("G4_Ag");
+
   std::vector<G4int> natoms;
   std::vector<G4String> elements;
 
@@ -110,7 +113,11 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4double aHe = 4.002602*g/mole;
   G4Element* elHe = new G4Element("Helium","He", 2, aHe);
-  
+
+  //density 1394
+  G4double aAr = 39.948*g/mole;
+  G4Element* elAr = new G4Element("Argon","Ar", 18, aAr);
+
   G4double aC = 12.0107*g/mole;
   G4Element* elC = new G4Element("Carbon", "C", 6, aC);
   
@@ -119,7 +126,16 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
   G4double He_frac = 0.6;
   G4double CF4_frac = 0.4;
-  
+  G4double Ar_frac = 0.;
+
+  //Ar gas
+  G4double densityAr = 1394*Ar_frac*g/m3;
+  G4double pressureAr = 1*Ar_frac*atmosphere;
+  G4double temperatureAr = 300*kelvin;
+  G4Material* Ar_gas = new G4Material("Ar_gas", densityAr, 1, kStateGas, temperatureAr, pressureAr);
+  Ar_gas->AddElement(elAr, 1);
+
+  //He gas
   G4double densityHe = 162.488*He_frac*g/m3;
   G4double pressureHe = 1*He_frac*atmosphere;
   G4double temperatureHe = 300*kelvin;
@@ -135,12 +151,13 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   CF4_gas->AddElement(elF, 4);
 
   //CYGNO_gas
-  G4double densityMix = He_gas->GetDensity()+CF4_gas->GetDensity();
-  G4double pressureMix = He_gas->GetPressure()+CF4_gas->GetPressure();
+  G4double densityMix = He_gas->GetDensity()+CF4_gas->GetDensity()+Ar_gas->GetDensity();
+  G4double pressureMix = He_gas->GetPressure()+CF4_gas->GetPressure()+Ar_gas->GetPressure();
   G4double temperatureMix = 300*kelvin;
-  G4Material* CYGNO_gas = new G4Material("CYGNO_gas", densityMix, 2, kStateGas, temperatureMix, pressureMix);
+  G4Material* CYGNO_gas = new G4Material("CYGNO_gas", densityMix, 3, kStateGas, temperatureMix, pressureMix);
   CYGNO_gas->AddMaterial(He_gas, He_gas->GetDensity()/densityMix*100*perCent);
   CYGNO_gas->AddMaterial(CF4_gas, CF4_gas->GetDensity()/densityMix*100*perCent);
+  CYGNO_gas->AddMaterial(Ar_gas, Ar_gas->GetDensity()/densityMix*100*perCent);
 
   //
   //defining kapton
@@ -323,7 +340,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   
-  
+/*WORKING!!
   //
   //Creating the RING
   //
@@ -352,16 +369,84 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   for(int i =-2;i<3;i++){
 
     G4VPhysicalVolume* phisicalRings = new G4PVPlacement(rotX,
-						       G4ThreeVector(0,-i*ringSpacing-i*RingThicknessAlongDrift+RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
-						       logicRing,
-						       "Ring",
-						       logicWorld,
-						       false,
-						       0);
-    
+                  G4ThreeVector(0,-i*ringSpacing-i*RingThicknessAlongDrift+RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
+                  logicRing,
+                  "Ring",
+                  logicWorld,
+                  false,
+                  0);
+
   }
   logicRing->SetVisAttributes(RingVisAttributes);
-  
+ */
+
+
+//
+//Creating the RING with a Trench and filling the trench with Silver
+//
+
+// Define dimensions
+G4double radialRingThickness = 1.0 * cm;
+G4double RingThicknessAlongDrift = 0.5 * cm;  
+G4double GasRadius = 36.9 * mm;
+G4double GasThickness = 50 * mm;
+G4double trenchHeight = 1 * mm;
+G4double trenchMinRadius = GasRadius + 1 * mm;
+
+// Rotation matrix for the ring
+G4RotationMatrix* rotX = new G4RotationMatrix();
+rotX->rotateX(90 * degree);
+
+// Define visualization attributes for the ring
+G4Colour darkGreyColor(0.3, 0.3, 0.3, 1.0);  // Opaque dark grey
+G4VisAttributes* RingVisAttributes = new G4VisAttributes(darkGreyColor);
+RingVisAttributes->SetForceSolid(true);
+// Define visualization attributes for the ring
+G4Colour lightGreyColor(0.7, 0.7, 0.7, 1.0);  // Opaque light grey
+G4VisAttributes* FieldRingAttributes = new G4VisAttributes(lightGreyColor);
+FieldRingAttributes->SetForceSolid(true);
+
+// Create solid geometry for the ring
+G4Tubs* solidRing = new G4Tubs("solidRing", GasRadius, GasRadius + radialRingThickness, RingThicknessAlongDrift / 2, 0, 360);
+
+// Create solid geometry for the trench
+G4Tubs* solidTrench = new G4Tubs("solidTrench", GasRadius - 10 * mm, trenchMinRadius, trenchHeight / 2, 0, 360);
+
+// Combine the ring and the trench
+G4VSolid* solidWithTrench = new G4SubtractionSolid("solidWithTrench", solidRing, solidTrench, 0, G4ThreeVector(0, 0, 0));
+
+// Create logical volume for the ring with trench
+G4LogicalVolume* logicRingWithTrench = new G4LogicalVolume(solidWithTrench, PMMA, "RingWithTrench");
+
+// Set visualization attributes for the ring with trench
+logicRingWithTrench->SetVisAttributes(RingVisAttributes);
+
+// Create solid geometry for Silver filling the trench
+G4Tubs* solidSilverFill = new G4Tubs("solidSilverFill", GasRadius , trenchMinRadius, trenchHeight / 2, 0, 360);
+
+// Create logical volume for Silver filling
+G4LogicalVolume* logicSilverFill = new G4LogicalVolume(solidSilverFill, Silver, "SilverFill");
+// Set visualization attributes for the ring with trench
+logicSilverFill->SetVisAttributes(FieldRingAttributes);
+
+// Place the Silver fill in the trench
+new G4PVPlacement(0, G4ThreeVector(0, 0, 0), logicSilverFill, "SilverFill", logicRingWithTrench, false, 0);
+
+// Loop to place multiple instances of the ring with trench in the simulation world
+G4int Nrings = 5;
+G4double ringSpacing = (GasThickness - 5 * RingThicknessAlongDrift) / 4;
+
+for (int i = -2; i < 3; i++) {
+    new G4PVPlacement(rotX,
+                      G4ThreeVector(0, -i * ringSpacing - i * RingThicknessAlongDrift + RingThicknessAlongDrift, InnerSourceContThick / 2 + fCollimatorDepth + fCollimatorDistance + GasRadius + radialRingThickness),
+                      logicRingWithTrench,
+                      "RingWithTrench",
+                      logicWorld,
+                      false,
+                      0);
+}
+
+
   //
   //CF4 sensitive volume
   //
@@ -369,7 +454,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
     
   G4Colour GasColor(0.0,0.0,1.0,0.5);
   G4VisAttributes* GasVisAttributes = new G4VisAttributes(GasColor);
-  GasVisAttributes->SetForceSolid(true);
+  //GasVisAttributes->SetForceSolid(true);
   
   G4Tubs* solidGasVolume = new G4Tubs("GasVolume",0,GasRadius,GasThickness/2,0,360);
 
@@ -382,12 +467,12 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   
   
   G4VPhysicalVolume* GasVolume = new G4PVPlacement(rotX,
-						       G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
-						       fLogicalGasVolume,
-						       "GasVolume",
-						       logicWorld,
-						       false,
-						       0);
+                  G4ThreeVector(0,RingThicknessAlongDrift,InnerSourceContThick/2+fCollimatorDepth+fCollimatorDistance+GasRadius+radialRingThickness),
+                  fLogicalGasVolume,
+                  "GasVolume",
+                  logicWorld,
+                  false,
+                  0);
   
     
 
